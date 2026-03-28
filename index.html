@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Walaa Cinema Pro | نظام ولاء المتطور</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon: #00ff00; --bg: #050505; --card: #111; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Cairo'; padding-bottom: 70px; overflow-x: hidden; }
+        
+        /* هيدر شركة ولاء */
+        header { position: fixed; top: 0; width: 100%; z-index: 1000; padding: 15px 5%; background: linear-gradient(to bottom, #000, transparent); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; border-bottom: 1px solid rgba(0,255,0,0.1); }
+        .logo { color: var(--neon); font-size: 20px; font-weight: bold; text-shadow: 0 0 10px var(--neon); }
+
+        /* البانر الرئيسي */
+        .hero { height: 55vh; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 30px; background-image: linear-gradient(to top, var(--bg), transparent); border-bottom: 2px solid var(--neon); }
+        .hero-info h1 { font-size: 30px; margin: 0; text-shadow: 2px 2px 10px #000; }
+
+        /* الصفوف */
+        .row { margin: 20px 0 20px 15px; }
+        .row-title { font-size: 19px; margin-bottom: 10px; border-right: 4px solid var(--neon); padding-right: 10px; font-weight: bold; }
+        .posters { display: flex; overflow-x: auto; gap: 12px; scrollbar-width: none; padding: 10px 0; }
+        .posters::-webkit-scrollbar { display: none; }
+        .p-card { min-width: 130px; height: 190px; border-radius: 10px; object-fit: cover; border: 1px solid #222; transition: 0.4s; cursor: pointer; }
+        .p-card:hover { border-color: var(--neon); transform: scale(1.1) translateY(-5px); box-shadow: 0 5px 20px rgba(0,255,0,0.4); }
+
+        /* مشغل الفيديو الخرافي */
+        #playerZone { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; }
+        #playerZone iframe { width: 100%; height: 75%; border: none; box-shadow: 0 0 30px var(--neon); }
+        .player-controls { background: #111; padding: 15px; display: flex; justify-content: space-around; border-top: 2px solid var(--neon); }
+        .p-btn { padding: 10px 20px; border-radius: 5px; border: 1px solid var(--neon); background: transparent; color: var(--neon); font-weight: bold; cursor: pointer; }
+        .p-btn.close { background: var(--neon); color: black; }
+
+        /* شريط التنقل السفلي */
+        .nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--neon); backdrop-filter: blur(10px); }
+        .n-item { color: #555; font-size: 12px; text-align: center; cursor: pointer; text-decoration: none; }
+        .n-item.active { color: var(--neon); }
+    </style>
+</head>
+<body>
+
+<header><div class="logo">Walaa CINEMA 🛡️</div></header>
+
+<div id="home">
+    <div class="hero" id="hero-bg"><div class="hero-info"><h1 id="hero-title">جاري التشفير...</h1></div></div>
+    <div class="row"><div class="row-title">أفلام نيتفلكس 🟢</div><div class="posters" id="r1"></div></div>
+    <div class="row"><div class="row-title">ترند الأسبوع ⚡</div><div class="posters" id="r2"></div></div>
+</div>
+
+<div id="playerZone">
+    <iframe id="videoIframe" allowfullscreen></iframe>
+    <div class="player-controls">
+        <button class="p-btn" onclick="switchServer(1)">سيرفر 1</button>
+        <button class="p-btn" onclick="switchServer(2)">سيرفر 2</button>
+        <button class="p-btn close" onclick="stopVideo()">إغلاق X</button>
+    </div>
+    <p style="text-align: center; font-size: 12px; color: #555;">إذا لم يعمل السيرفر، جرب التبديل (شركة ولاء)</p>
+</div>
+
+<div class="nav">
+    <div class="n-item active">🏠<br>الرئيسية</div>
+    <a href="https://t.me/FFFdif" class="n-item">🛡️<br>المطور</a>
+</div>
+
+<script>
+    const V3_KEY = "851ccad574593617d921dde51303751c";
+    const V4_TOKEN = "EyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4NTFjY2FkNTc0NTkzNjE3ZDkyMWRkZTUxMzAzNzUxYyIsIm5iZiI6MTc3NDczOTQwMC4wODA5OTk5LCJzdWIiOiI2OWM4NWZjOGJlYmVkYjJiYzg2NjVlZDUiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.hp8WR2YMLKPiH4SkIhGg27xjLvOB8f8cXb7z8T0WIMU"; 
+
+    let currentMovieId = "";
+    let currentType = "";
+
+    async function init() {
+        const options = {
+            method: 'GET',
+            headers: { accept: 'application/json', Authorization: `Bearer ${V4_TOKEN}` }
+        };
+
+        // جلب البيانات بذكاء v4
+        const res = await fetch(`https://api.themoviedb.org/3/trending/all/day?api_key=${V3_KEY}&language=ar`, options);
+        const data = await res.json();
+        
+        const main = data.results[0];
+        document.getElementById('hero-bg').style.backgroundImage = `linear-gradient(to top, #050505, transparent), url('https://image.tmdb.org/t/p/original${main.backdrop_path}')`;
+        document.getElementById('hero-title').innerText = main.title || main.name;
+
+        data.results.forEach((m, i) => {
+            const img = document.createElement('img');
+            img.src = "https://image.tmdb.org/t/p/w500" + m.poster_path;
+            img.className = "p-card";
+            img.onclick = () => { currentMovieId = m.id; currentType = m.media_type; switchServer(1); };
+            
+            if(i < 10) document.getElementById('r1').appendChild(img);
+            else document.getElementById('r2').appendChild(img);
+        });
+    }
+
+    function switchServer(num) {
+        const zone = document.getElementById('playerZone');
+        const frame = document.getElementById('videoIframe');
+        let path = (currentType === 'tv') ? `tv/${currentMovieId}` : `movie/${currentMovieId}`;
+        
+        // سيرفرات شركة ولاء المختارة
+        if(num === 1) frame.src = `https://vidsrc.to/embed/${path}`;
+        if(num === 2) frame.src = `https://vidsrc.me/embed/${path}`;
+        
+        zone.style.display = 'flex';
+    }
+
+    function stopVideo() {
+        document.getElementById('playerZone').style.display = 'none';
+        document.getElementById('videoIframe').src = "";
+    }
+
+    init();
+</script>
+</body>
+</html>
