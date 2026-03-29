@@ -3,110 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Walaa Cinema | Shashaty Edition</title>
+    <title>Walaa Cinema Pro | Direct 🛡️</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #0f0; --bg: #050505; --card: #121212; --txt: #ffffff; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); color: var(--txt); font-family: 'Cairo', sans-serif; overflow-x: hidden; padding-bottom: 70px; transition: 0.3s; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { margin: 0; background: var(--bg); color: var(--txt); font-family: 'Cairo', sans-serif; overflow-x: hidden; padding-bottom: 80px; }
         
-        .has-outline { text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+        .has-outline { text-shadow: 1px 1px 4px rgba(0,0,0,0.9); }
 
-        /* شريط التنقل السفلي (مثل الصورة بالضبط) */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; z-index: 5000; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #555; font-size: 11px; cursor: pointer; transition: 0.3s; }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
-        .nav-item.active { color: var(--neon); }
-        .nav-item.active i { filter: drop-shadow(0 0 5px var(--neon)); }
+        /* الهيدر والبحث */
+        header { position: sticky; top: 0; background: var(--bg); z-index: 1000; padding: 15px; border-bottom: 1px solid #222; }
+        .logo-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .search-input { width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 12px 15px; color: white; font-family: 'Cairo'; }
 
-        /* الصفحات */
-        .page { display: none; padding: 20px 15px; min-height: 100vh; }
-        .page.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* الرئيسية */
-        .sh-logo { text-align: center; padding: 10px; font-weight: 900; font-size: 24px; color: var(--neon); text-transform: uppercase; letter-spacing: 2px; }
-        .hero-banner { width: 100%; height: 200px; border-radius: 15px; background: url('https://image.tmdb.org/t/p/original/mBaXZ95O2vS7AyvOcAs0Yq61wdW.jpg') center/cover; margin-bottom: 20px; border: 1px solid #333; position: relative; }
-        .section-title { font-size: 16px; font-weight: 700; margin: 20px 0 10px; display: flex; justify-content: space-between; align-items: center; }
-        .section-title span { color: var(--neon); font-size: 12px; }
+        /* شريط الأقسام */
+        .genres-scroll { display: flex; overflow-x: auto; gap: 10px; padding: 10px 0; scrollbar-width: none; }
+        .genre-chip { padding: 6px 18px; background: #1a1a1a; border-radius: 20px; font-size: 13px; white-space: nowrap; border: 1px solid #333; transition: 0.3s; }
+        .genre-chip.active { background: var(--neon); color: #000; font-weight: bold; border-color: var(--neon); box-shadow: 0 0 10px var(--neon); }
 
         /* شبكة الأفلام */
-        .movie-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .m-card { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid #222; }
-        .m-card img { width: 100%; height: 150px; object-fit: cover; }
-        .rating { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: gold; font-size: 10px; padding: 2px 5px; border-radius: 5px; }
+        .movie-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 15px; }
+        .m-card { border-radius: 12px; overflow: hidden; border: 2px solid var(--neon); box-shadow: 0 0 10px rgba(0,255,0,0.1); transition: 0.3s; }
+        .m-card img { width: 100%; height: 160px; object-fit: cover; display: block; }
+        .m-card:active { transform: scale(0.95); }
 
-        /* البحث (مثل الصورة 1671) */
-        .search-bar { background: #1a1a1a; border-radius: 10px; padding: 12px; display: flex; align-items: center; margin-bottom: 15px; }
-        .search-bar input { background: transparent; border: none; color: white; width: 100%; outline: none; font-family: 'Cairo'; }
-        .filter-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; scrollbar-width: none; }
-        .f-tab { padding: 8px 20px; background: #1a1a1a; border-radius: 20px; font-size: 13px; white-space: nowrap; }
-        .f-tab.active { background: var(--neon); color: #000; font-weight: bold; }
+        /* صفحة التفاصيل */
+        #detailsPage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; display: none; overflow-y: auto; padding-bottom: 100px; }
+        .det-cover { width: 100%; height: 280px; object-fit: cover; mask-image: linear-gradient(to bottom, black 60%, transparent); }
+        .det-content { padding: 0 20px; margin-top: -40px; }
+        .det-meta { display: flex; justify-content: space-around; background: #111; padding: 12px; border-radius: 15px; border: 1px solid #222; margin: 15px 0; font-size: 13px; }
+        
+        /* الحلقات */
+        .ep-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px 0; }
+        .ep-item { background: #1a1a1a; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-weight: 900; border: 1px solid #333; position: relative; }
+        .ep-item:active { background: var(--neon); color: black; }
 
-        /* الأقسام (مثل الصورة 1672/1673) */
-        .genre-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .g-card { height: 100px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; overflow: hidden; border: 1px solid #333; }
-        .g-card img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.4; z-index: 1; }
-        .g-card span { z-index: 2; position: relative; text-shadow: 0 0 10px #000; }
+        /* الشريط السفلي */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; z-index: 1500; }
+        .nav-btn { color: #555; text-align: center; font-size: 11px; }
+        .nav-btn.active { color: var(--neon); }
 
-        /* الإعدادات (مثل الصورة 1675) */
-        .set-group { background: #111; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
-        .set-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .color-dot { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
-        .color-dot.active { border-color: white; transform: scale(1.1); }
-        .btn-save { width: 100%; background: var(--neon); color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: bold; margin-top: 10px; }
-
-        /* المشغل */
-        #player { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9000; display: none; flex-direction: column; }
+        /* أنيميشن التحميل الخفيف */
+        #loading { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; display:none; justify-content:center; align-items:center; flex-direction:column; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #111; border-top: 5px solid var(--neon); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="has-outline">
 
-    <div id="home" class="page active">
-        <div class="sh-logo">Walaa Cinema 🛡️</div>
-        <div class="hero-banner"></div>
-        <div class="section-title">الأفلام المميزة 🎬 <span>عرض الكل</span></div>
-        <div class="movie-grid" id="featuredGrid"></div>
+    <div id="loading">
+        <div class="spinner"></div>
+        <p style="color:var(--neon); margin-top:15px; font-weight:bold;">جاري فتح المشغل الآمن...</p>
     </div>
 
-    <div id="genres" class="page">
-        <h2 style="text-align: center;">الأقسام</h2>
-        <div class="genre-grid">
-            <div class="g-card" onclick="loadGenre(28)"><span>أكشن</span><img src="https://image.tmdb.org/t/p/w500/8Y7S9S7TTuG4vBne77SnyT0pFFp.jpg"></div>
-            <div class="g-card" onclick="loadGenre(27)"><span>رعب</span><img src="https://image.tmdb.org/t/p/w500/7pEnS0vByFY0Xwln69nuGfsz8vM.jpg"></div>
-            <div class="g-card" onclick="loadGenre(35)"><span>كوميدي</span><img src="https://image.tmdb.org/t/p/w500/8Y7S9S7TTuG4vBne77SnyT0pFFp.jpg"></div>
-            <div class="g-card" onclick="loadGenre(16)"><span>أنمي</span><img src="https://image.tmdb.org/t/p/w500/2L9S9S7TTuG4vBne77SnyT0pFFp.jpg"></div>
+    <div id="homePage">
+        <header>
+            <div class="logo-area"><div style="font-weight:900; color:var(--neon); font-size:20px;">Walaa Cinema Pro 🛡️</div></div>
+            <input type="text" class="search-input" placeholder="ابحث عن فيلم أو مسلسل..." oninput="searchNow(this.value)">
+            <div class="genres-scroll">
+                <div class="genre-chip active" onclick="loadMovies(0, this)">الكل</div>
+                <div class="genre-chip" onclick="loadMovies(27, this)">رعب</div>
+                <div class="genre-chip" onclick="loadMovies(28, this)">أكشن</div>
+                <div class="genre-chip" onclick="loadMovies(16, this)">أنمي</div>
+            </div>
+        </header>
+        <div class="movie-grid" id="mainGrid"></div>
+    </div>
+
+    <div id="detailsPage">
+        <button onclick="closeDetails()" style="position:absolute; top:20px; left:20px; z-index:10; background:rgba(0,0,0,0.6); color:white; border:none; width:40px; height:40px; border-radius:50%;">✕</button>
+        <img id="detCover" class="det-cover">
+        <div class="det-content">
+            <h2 id="detTitle" style="text-align:center;"></h2>
+            <div class="det-meta">
+                <span id="detYear"></span>
+                <span id="detRate">⭐</span>
+                <span style="color:var(--neon);">YTV PRO Ready</span>
+            </div>
+            <p id="detDesc" style="font-size:13px; color:#aaa; line-height:1.6;"></p>
+            
+            <div id="tvContent">
+                <h3 style="margin-top:25px;">الحلقات (اضغط للتشغيل الفوري)</h3>
+                <div class="ep-grid" id="episodesGrid"></div>
+            </div>
+            <button id="moviePlayBtn" onclick="directPlay()" class="ep-item" style="width:100%; height:50px; background:var(--neon); color:black; margin-top:20px; display:none;">تشغيل الفيلم فوراً 🎬</button>
         </div>
     </div>
 
-    <div id="search" class="page">
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="مثلاً: Batman" oninput="searchMovies()">
-        </div>
-        <div class="filter-tabs">
-            <div class="f-tab active">الكل</div>
-            <div class="f-tab">الأفلام</div>
-            <div class="f-tab">المسلسلات</div>
-        </div>
-        <div id="searchGrid" class="movie-grid"></div>
+    <div class="nav-bar">
+        <div class="nav-btn active">🏠<br>الرئيسية</div>
+        <div class="nav-btn">🔍<br>البحث</div>
+        <div class="nav-btn">⚙️<br>الإعدادات</div>
     </div>
 
-    <div id="settings" class="page">
-        <h2>المزيد</h2>
-        <div class="set-group">
-            <div class="set-row"><span>تفعيل الإشعارات</span><input type="checkbox" checked></div>
-            <div class="set-row"><span>حجم الخط</span><input type="range" min="12" max="20" value="14"></div>
-        </div>
-        <h3>لون الخط</h3>
-        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <div class="color-dot active" style="background: #0f0;" onclick="changeTheme('#0f0')"></div>
-            <div class="color-dot" style="background: #f00;" onclick="changeTheme('#f00')"></div>
-            <div class="color-dot" style="background: #007bff;" onclick="changeTheme('#007bff')"></div>
-            <div class="color-dot" style="background: #ff00ff;" onclick="changeTheme('#ff00ff')"></div>
-        </div>
-        <button class="btn-save" onclick="alert('تم الحفظ بنجاح!')">حفظ</button>
-        <div class="set-group" style="margin-top: 20px; cursor: pointer;" onclick="window.location.href='https://t.me/FFFdif'">
-            حول المطور 🛡️
+    <script>
+        const API_KEY = "851ccad574593617d921dde51303751c";
+        let currentItem = {};
+
+        async function loadMovies(genreId = 0, el = null) {
+            if(el) {
+                document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('active'));
+                el.classList.add('active');
+            }
+            const url = genreId === 0 
+                ? `https://api.themoviedb.org/3/trending/all/day?api_key=${API_KEY}&language=ar`
+                : `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=ar`;
+            const res = await fetch(url);
+            const data = await res.json();
+            const grid = document.getElementById('mainGrid');
+            grid.innerHTML = "";
+            data.results.forEach(m => {
+                if(m.poster_path) {
+                    const div = document.createElement('div');
+                    div.className = "m-card";
+                    div.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${m.poster_path}">`;
+                    div.onclick = () => openDetails(m.id, m.media_type || 'movie');
+                    grid.appendChild(div);
+                }
+            });
+        }
+
+        async function openDetails(id, type) {
+            const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=ar`);
+            const m = await res.json();
+            currentItem = { id, type };
+
+            document.getElementById('detCover').src = `https://image.tmdb.org/t/p/original${m.backdrop_path}`;
+            document.getElementById('detTitle').innerText = m.title || m.name;
+            document.getElementById('detDesc').innerText = m.overview || "لا يوجد ملخص متاح.";
+            document.getElementById('detYear').innerText = (m.release_date || m.first_air_date || "").split('-')[0];
+            document.getElementById('detRate').innerText = "⭐ " + m.vote_average.toFixed(1);
+
+            if(type === 'tv') {
+                document.getElementById('tvContent').style.display = 'block';
+                document.getElementById('moviePlayBtn').style.display = 'none';
+                loadEpisodes(id, 1);
+            } else {
+                document.getElementById('tvContent').style.display = 'none';
+                document.getElementById('moviePlayBtn').style.display = 'flex';
+            }
+            document.getElementById('detailsPage').style.display = 'block';
+        }
+
+        async function loadEpisodes(id, season) {
+            const res = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${season}?api_key=${API_KEY}&language=ar`);
+            const data = await res.json();
+            const grid = document.getElementById('episodesGrid');
+            grid.innerHTML = "";
+            data.episodes.forEach(ep => {
+                const item = document.createElement('div');
+                item.className = "ep-item";
+                item.innerText = ep.episode_number;
+                item.onclick = () => directPlay(season, ep.episode_number);
+                grid.appendChild(item);
+            });
+        }
+
+        function directPlay(s = 1, e = 1) {
+            // إظهار شاشة التحميل الصامتة لثانية واحدة
+            document.getElementById('loading').style.display = 'flex';
+            
+            const { id, type } = currentItem;
+            const videoUrl = type === 'tv' 
+                ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}`
+                : `https://vidsrc.to/embed/movie/${id}`;
+
+            // الأهم: التوجه مباشرة لمشغل YTV PRO
+            setTimeout(() => {
+                window.location.href = `intent:${videoUrl}#Intent;package=com.ytv.pro;scheme=https;end`;
+                document.getElementById('loading').style.display = 'none';
+            }, 800);
+        }
+
+        function closeDetails() { document.getElementById('detailsPage').style.display = 'none'; }
+        loadMovies();
+    </script>
+</body>
+</html>
         </div>
     </div>
 
