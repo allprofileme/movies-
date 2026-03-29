@@ -3,79 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Walaa Cinema Pro | Shasheti Style</title>
+    <title>Walaa Cinema Pro 🛡️</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        /* نظام الألوان والهوية البصرية لشاشتي */
-        :root { --main-green: #00ff00; --bg-dark: #000000; --card-bg: #111111; --text-gray: #b3b3b3; }
+        :root { --main-green: #00ff00; --bg: #000000; --card: #121212; --nav: #080808; }
         
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Cairo', sans-serif; }
-        body { margin: 0; background-color: var(--bg-dark); color: white; overflow-x: hidden; }
+        /* منع التحديد واللمس العشوائي لجعل الـ APK يبدو أصلياً */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Cairo', sans-serif; padding-bottom: 75px; overflow-x: hidden; }
 
-        /* الهيدر العلوي */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; position: sticky; top: 0; background: rgba(0,0,0,0.9); z-index: 1000; border-bottom: 1px solid #1a1a1a; }
-        .logo { font-weight: 900; font-size: 20px; color: var(--main-green); display: flex; align-items: center; gap: 8px; }
+        /* الهيدر الاحترافي */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; position: sticky; top: 0; background: rgba(0,0,0,0.95); z-index: 1000; }
+        .logo { font-weight: 900; color: var(--main-green); font-size: 22px; letter-spacing: 1px; }
 
-        /* شريط التصنيفات (الأفقية) */
-        .categories { display: flex; overflow-x: auto; gap: 12px; padding: 15px; scrollbar-width: none; }
-        .cat-item { padding: 8px 20px; background: #1a1a1a; border-radius: 25px; font-size: 14px; white-space: nowrap; border: 1px solid #333; color: white; transition: 0.3s; }
-        .cat-item.active { background: var(--main-green); color: black; font-weight: bold; border-color: var(--main-green); }
+        /* شريط التصنيفات المتحرك (مثل فيديو 1688) */
+        .categories { display: flex; overflow-x: auto; gap: 10px; padding: 10px 15px; scrollbar-width: none; }
+        .cat-chip { padding: 7px 20px; background: #1a1a1a; border-radius: 20px; font-size: 13px; white-space: nowrap; border: 1px solid #222; transition: 0.3s; }
+        .cat-chip.active { background: var(--main-green); color: black; font-weight: bold; border-color: var(--main-green); }
 
-        /* شبكة الأفلام */
-        .content-section { padding: 10px 15px; }
-        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .movie-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .movie-card { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid #222; aspect-ratio: 2/3; }
-        .movie-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }
-        .movie-card:active { transform: scale(0.96); }
-        .rating-badge { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 6px; font-size: 10px; color: gold; }
+        /* شبكة المحتوى */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; }
+        .card { position: relative; border-radius: 10px; overflow: hidden; background: var(--card); border: 1px solid #1a1a1a; aspect-ratio: 2/3; }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
+        .card .title { position: absolute; bottom: 0; width: 100%; background: linear-gradient(transparent, black); padding: 5px; font-size: 10px; text-align: center; }
 
-        /* المشغل الداخلي (نفس شاشتي) */
-        #playerOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 5000; display: none; flex-direction: column; }
-        .player-header { padding: 15px; display: flex; align-items: center; gap: 15px; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
-        iframe { width: 100%; height: 100%; border: none; }
-        .close-btn { background: #ff3b30; color: white; border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 15px auto; }
+        /* مشغل الفيديو الداخلي (بدون إعلانات) */
+        #player { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 5000; display: none; flex-direction: column; }
+        .player-nav { padding: 15px; display: flex; align-items: center; background: #000; border-bottom: 1px solid #222; }
+        iframe { flex-grow: 1; border: none; width: 100%; }
+        .back-btn { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 5px; }
 
-        /* القائمة السفلية */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: #080808; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #1a1a1a; z-index: 1000; }
-        .nav-item { color: var(--text-gray); text-align: center; font-size: 11px; }
-        .nav-item.active { color: var(--main-green); }
+        /* القائمة السفلية (نفس فيديو شاشتي) */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: var(--nav); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #1a1a1a; }
+        .nav-link { color: #666; text-align: center; font-size: 10px; text-decoration: none; }
+        .nav-link.active { color: var(--main-green); }
+        .nav-link i { font-size: 20px; display: block; margin-bottom: 2px; }
 
-        /* إعدادات الترجمة (نفس ستايل الفيديو) */
-        .subtitle-settings { background: #111; padding: 20px; border-radius: 20px 20px 0 0; position: absolute; bottom: 0; width: 100%; display: none; }
+        /* منع الإعلانات عبر الـ Iframe */
+        iframe { pointer-events: auto; }
     </style>
 </head>
 <body>
 
-    <header class="header">
-        <div class="logo">✨🛡️ Walaa Cinema Pro</div>
-        <div style="font-size: 22px;">🔍</div>
+    <header>
+        <div class="logo">Walaa Cinema Pro 🛡️</div>
+        <div style="font-size: 20px;">🔍</div>
     </header>
 
     <div class="categories">
-        <div class="cat-item active">الكل ⚡</div>
-        <div class="cat-item">رعب 👻</div>
-        <div class="cat-item">أكشن 💣</div>
-        <div class="cat-item">أنمي 👺</div>
-        <div class="cat-item">دراما 🎬</div>
+        <div class="cat-chip active">الرئيسية</div>
+        <div class="cat-chip">أفلام</div>
+        <div class="cat-chip">مسلسلات</div>
+        <div class="cat-chip">أنمي</div>
+        <div class="cat-chip">أكشن</div>
     </div>
 
-    <div class="content-section">
-        <div class="section-title">أحدث الأفلام والمسلسلات</div>
-        <div class="movie-grid" id="mainGrid">
-            </div>
-    </div>
+    <div class="grid" id="movieGrid"></div>
 
-    <div id="playerOverlay">
-        <div class="player-header">
-            <span id="videoTitle" style="font-weight: bold;"></span>
+    <div id="player">
+        <div class="player-nav">
+            <button class="back-btn" onclick="closePlayer()">✕ رجوع</button>
+            <span id="pTitle" style="margin-right: 15px; font-weight: bold; font-size: 14px;"></span>
         </div>
-        <iframe id="videoFrame" allowfullscreen></iframe>
-        <button class="close-btn" onclick="closePlayer()">إغلاق X</button>
+        <iframe id="videoIframe" sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts" allowfullscreen></iframe>
     </div>
 
-    <nav class="bottom-nav">
-        <div class="nav-item active">🏠<br>الرئيسية</div>
+    <div class="bottom-nav">
+        <div class="nav-link active">🏠<br>الرئيسية</div>
+        <div class="nav-link">⭐<br>المفضلة</div>
+        <div class="nav-link">📁<br>الأقسام</div>
+        <div class="nav-link">⚙️<br>الإعدادات</div>
+    </div>
+
+    <script>
+        const API_KEY = "851ccad574593617d921dde51303751c";
+
+        async function fetchMovies() {
+            const res = await fetch(`https://api.themoviedb.org/3/trending/all/day?api_key=${API_KEY}&language=ar`);
+            const data = await res.json();
+            const grid = document.getElementById('movieGrid');
+            grid.innerHTML = "";
+
+            data.results.forEach(m => {
+                if(m.poster_path) {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <img src="https://image.tmdb.org/t/p/w500${m.poster_path}">
+                        <div class="title">${m.title || m.name}</div>
+                    `;
+                    card.onclick = () => openPlayer(m.id, m.media_type || 'movie', m.title || m.name);
+                    grid.appendChild(card);
+                }
+            });
+        }
+
+        function openPlayer(id, type, title) {
+            const p = document.getElementById('player');
+            const f = document.getElementById('videoIframe');
+            document.getElementById('pTitle').innerText = title;
+            
+            // رابط نظيف يدعم الـ WebView الخاص بالـ APK والـ iOS
+            f.src = type === 'tv' 
+                ? `https://vidsrc.to/embed/tv/${id}/1/1` 
+                : `https://vidsrc.to/embed/movie/${id}`;
+            
+            p.style.display = 'flex';
+        }
+
+        function closePlayer() {
+            document.getElementById('player').style.display = 'none';
+            document.getElementById('videoIframe').src = "";
+        }
+
+        fetchMovies();
+    </script>
+</body>
+</html>
         <div class="nav-item">🔥<br>المميزة</div>
         <div class="nav-item">📂<br>الأقسام</div>
         <div class="nav-item">👤<br>حسابي</div>
